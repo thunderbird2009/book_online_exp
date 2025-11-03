@@ -6,7 +6,7 @@ This repository contains sample chapters and code the book project “Engineerin
 - [Sample Chapters](sample_chapters/)
   - [ch0_front_matter.md](sample_chapters/ch0_front_matter.md): Front matter and full Table of Contents]
   - [ch3_designing_trustworthy_experiments.md](sample_chapters/ch3_designing_trustworthy_experiments.md): Designing Trustworthy Experiments.
-  - [ch13_ranking_experiments.md](ch13_ranking_experiments.md): Evaluating Ranking Systems (interleaving, Wilcoxon, power simulation)
+  - [ch13_ranking_experiments.md](sample_chapters/ch13_ranking_experiments.md): Evaluating Ranking Systems (interleaving, Wilcoxon, power simulation)
 - [Code in notebooks](code/)
 
 ## Suggested review flow (10–30 minutes)
