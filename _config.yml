@@ -1,17 +1,44 @@
-# _config.yml
+---
+layout: null
+---
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>{{ page.title | default: site.title }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
 
-# This sets the default layout for all Markdown files
-defaults:
-  -
-    scope:
-      path: "" # An empty string means all files in the repository
-      type: "pages"
-    values:
-      layout: "default"
+    </head>
+<body>
 
-# Optional: Set the Markdown processor to Kramdown
-# which is generally compatible with LaTeX syntax
-markdown: kramdown
+    <header>
+        <h1>{{ page.title | default: site.title }}</h1>
+    </header>
 
-# Optional: Specify the theme (if you're using one)
-# theme: jekyll-theme-cayman
+    <main>
+        {{ content }}
+    </main>
+
+    <footer>
+        <p>&copy; {{ site.time | date: "%Y" }} {{ site.title }}</p>
+    </footer>
+
+</body>
+</html>
