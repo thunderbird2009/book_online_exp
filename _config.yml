@@ -1,44 +1,19 @@
----
-layout: null
----
-<!DOCTYPE html>
-<html lang="en-US">
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>{{ page.title | default: site.title }}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    
-    <script>
-        MathJax = {
-            tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['$$', '$$'], ['\\[', '\\]']]
-            },
-            svg: {
-                fontCache: 'global'
-            }
-        };
-    </script>
-    
-    <script type="text/javascript" id="MathJax-script" async
-        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
+# _config.yml (in your repo root)
 
-    </head>
-<body>
+# 1. Automatic Layout Application (from previous step)
+defaults:
+  -
+    scope:
+      path: "" 
+      type: "pages"
+    values:
+      layout: "default"
 
-    <header>
-        <h1>{{ page.title | default: site.title }}</h1>
-    </header>
-
-    <main>
-        {{ content }}
-    </main>
-
-    <footer>
-        <p>&copy; {{ site.time | date: "%Y" }} {{ site.title }}</p>
-    </footer>
-
-</body>
-</html>
+# 2. **CRITICAL: Tell Kramdown to use MathJax extension**
+# This instructs Kramdown to treat math blocks as raw text
+markdown: kramdown
+kramdown:
+  input: GFM
+  math_engine: mathjax # Use MathJax processing
+  # The following line is crucial for $...$ to be treated as math delimiters
+  enable_math: true
