@@ -7,6 +7,7 @@ This repository contains sample chapters and code the book project “Engineerin
   - [ch0_front_matter.md](sample_chapters/ch0_front_matter.md): Front matter and full Table of Contents]
   - [ch3_designing_trustworthy_experiments.md](sample_chapters/ch3_designing_trustworthy_experiments.md): Designing Trustworthy Experiments.
   - [ch13_ranking_experiments.md](sample_chapters/ch13_ranking_experiments.md): Evaluating Ranking Systems (interleaving, Wilcoxon, power simulation)
+  - [ch16_contextual_bandits.md](sample_chapters/ch16_contextual_bandits.md): Contextual Multi-ARM Bandit
 - [Code in notebooks](code/)
 
 ## Suggested review flow (10–30 minutes)
@@ -14,7 +15,8 @@ This repository contains sample chapters and code the book project “Engineerin
 2) Read the two core samples in order:
    - Ch3 — experimental design and pitfalls (fixed horizon, decision rules, multiple testing, peeking)
    - Ch13 — interleaving for ranking with Wilcoxon and simulation‑based power
-   - Refer to notebook ch3_* and ch13_* for working code examples.
+   - Ch16 — Contextual Bandit with LinTS, linUCB, Neural Bandits, etc.
+   - Refer to python notebook ch3_*, ch13_* and ch16_* for working code examples.
 
 ## Code quickstart
 If you want to run examples, use the minimal setup below. Otherwise, you can ignore this section.
