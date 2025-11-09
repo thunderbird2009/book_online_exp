@@ -12,8 +12,10 @@ layout: null
     <script>
         MathJax = {
             tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+                // Revert inline math to use the safer delimiters
+                inlineMath: [['\\(', '\\)']], 
+                // Keep support for standard display delimiters
+                displayMath: [['$$', '$$'], ['\\[', '\\]']] 
             },
             svg: {
                 fontCache: 'global'
