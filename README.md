@@ -8,7 +8,7 @@ This repository contains sample chapters and code the book project “Engineerin
   - [ch3_designing_trustworthy_experiments.md](sample_chapters/ch3_designing_trustworthy_experiments.md): Designing Trustworthy Experiments.
   - [ch13_ranking_experiments.md](sample_chapters/ch13_ranking_experiments.md): Evaluating Ranking Systems (interleaving, Wilcoxon, power simulation)
   - [ch16_contextual_bandits.md](sample_chapters/ch16_contextual_bandits.md): Contextual Multi-ARM Bandit
-- [Code in notebooks](code/)
+- [Code in notebooks](https://github.com/thunderbird2009/book_online_exp/tree/main/code/)
 
 ## Suggested review flow (10–30 minutes)
 1) Skim Ch0 front matter and ToC (if present) to confirm scope and structure.
