@@ -1,5 +1,9 @@
 # _config.yml (in your repo root)
 
+# This sets the global site.title variable
+title: Engineering Online Experimentation
+description: Architecture, Pipelines, and Statistical Methods for Production-Scale Systems
+
 # 1. Automatic Layout Application (from previous step)
 defaults:
   -
