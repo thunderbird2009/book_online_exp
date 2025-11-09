@@ -9,11 +9,14 @@ defaults:
     values:
       layout: "default"
 
-# 2. **CRITICAL: Tell Kramdown to use MathJax extension**
-# This instructs Kramdown to treat math blocks as raw text
+# CRITICAL: This disables automatic Markdown processing (e.g., italics from underscores)
+# inside your math blocks (like $$...$$).
 markdown: kramdown
 kramdown:
   input: GFM
-  math_engine: mathjax # Use MathJax processing
-  # The following line is crucial for $...$ to be treated as math delimiters
+  math_engine: mathjax
   enable_math: true
+  # Explicitly tell kramdown NOT to mangle backslashes, which are essential for LaTeX commands (\frac, \sum)
+  syntax_highlighter_opts:
+    block_delimiter: "\$"
+    remove_first_line: false
