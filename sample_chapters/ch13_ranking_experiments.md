@@ -151,7 +151,7 @@ TDI focuses on structural fairness to mitigate bias and relies on a simple **win
 
 P-Interleaving is a more rigorous approach that uses **explicit exposure probabilities** for normalization. This method calculates a bias-corrected score for each algorithm *within a single query*, which then becomes the basis for the final statistical test.
 
-1.  **Probabilistic Assignment:** In P-Interleaving, the item placed at position $k$ is selected based on a known probability factor, $P(\text{Model} | \text{Rank})$. This means the likelihood that an item from Algorithm A is shown at a position (a rank) is a known value, usually constant over all queries. This is also referred to as the A's presentation probability noted as: ${P}(\text{an item of A was shown at that rank position})$.
+1.  **Probabilistic Assignment:** In P-Interleaving, the item placed at position $k$ is selected based on a known probability factor, $P(\text{Model} | \text{Rank})$. This means the likelihood that an item from Algorithm A is shown at a position (a rank) is a known value, usually constant over all queries. This is also referred to as the A's presentation probability noted as: $P(\text{an item of A was shown at that rank position})$.
 2.  **Click Weighting:** If a click occurs at position $k$, it is weighted based on the ranking position of the clicked item. This `PositionWeight` intends to encourage algorithms to rank clicked items at higher ranking positions.
 3.  **The Per-Query Score:** For a single query, the normalized score for each algorithm is the sum of the weighted scores for all clicks it received *in that query*.
     $$\text{Score}_{\text{A}} = \sum_{\text{clicks in query}} \frac{\text{PositionWeight}}{P(\text{A's item was shown at that rank position})}$$
@@ -916,6 +916,7 @@ This two-stage approach creates an efficient "ranking factory" that consistently
 [7] Hollander, M., & Wolfe, D. A. (1999). *Nonparametric Statistical Methods* (2nd ed.). John Wiley & Sons. Chapter 3: The One-Sample Location Problem.
 
 [8] Schuth, A., Bruintjes, R., Büttner, F., van Doorn, J., Groenland, C., Oosterhuis, H., ... & de Rijke, M. (2016). *Probabilistic Multileave for Online Retrieval Evaluation*. Proceedings of the 39th International ACM SIGIR Conference on Research and Development in Information Retrieval.
+
 
 
 
