@@ -1,0 +1,17 @@
+# _config.yml
+
+# This sets the default layout for all Markdown files
+defaults:
+  -
+    scope:
+      path: "" # An empty string means all files in the repository
+      type: "pages"
+    values:
+      layout: "default"
+
+# Optional: Set the Markdown processor to Kramdown
+# which is generally compatible with LaTeX syntax
+markdown: kramdown
+
+# Optional: Specify the theme (if you're using one)
+# theme: jekyll-theme-cayman
