@@ -6,15 +6,14 @@ layout: null
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>{{ page.title | default: site.title }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     <script>
         MathJax = {
             tex: {
-                // Revert inline math to use the safer delimiters
-                inlineMath: [['\\(', '\\)']], 
-                // Keep support for standard display delimiters
-                displayMath: [['$$', '$$'], ['\\[', '\\]']] 
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
             },
             svg: {
                 fontCache: 'global'
