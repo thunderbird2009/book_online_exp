@@ -93,7 +93,7 @@
     // Structure: <div class="language-mermaid ..."><pre><code>...</code></pre></div>
     const rougeBlocks = document.querySelectorAll('div.language-mermaid');
     rougeBlocks.forEach((div) => {
-      const codeEl = div.querySelector('code');
+      const codeEl = div.querySelector('pre.highlight code');
       if (codeEl) {
         const content = codeEl.textContent;
         const newDiv = document.createElement('div');
