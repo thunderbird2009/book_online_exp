@@ -84,29 +84,19 @@
   });
 </script>
 
+<!-- Highlight.js for Syntax Highlighting (Client-side) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+
 <script type="module">
   import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
   mermaid.initialize({ startOnLoad: false });
 
   document.addEventListener('DOMContentLoaded', () => {
-    // 1. Handle Rouge (Syntax Highlighting Enabled)
-    // Structure: <div class="language-mermaid ..."><pre><code>...</code></pre></div>
-    const rougeBlocks = document.querySelectorAll('div.language-mermaid');
-    rougeBlocks.forEach((div) => {
-      const codeEl = div.querySelector('pre.highlight code');
-      if (codeEl) {
-        const content = codeEl.textContent;
-        const newDiv = document.createElement('div');
-        newDiv.className = 'mermaid';
-        newDiv.textContent = content;
-        div.replaceWith(newDiv);
-      }
-    });
-
-    // 2. Handle Standard/Kramdown (Syntax Highlighting Disabled)
-    // Structure: <pre><code class="language-mermaid">...</code></pre>
-    const standardBlocks = document.querySelectorAll('pre code.language-mermaid');
-    standardBlocks.forEach((block) => {
+    // Since Rouge is disabled, we can use the simple selector
+    const mermaidBlocks = document.querySelectorAll('pre code.language-mermaid');
+    mermaidBlocks.forEach((block) => {
       const content = block.textContent;
       const div = document.createElement('div');
       div.className = 'mermaid';
