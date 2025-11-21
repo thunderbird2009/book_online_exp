@@ -1,5 +1,10 @@
 <!-- Medium Zoom for Images -->
-<script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js"></script>
+<script src='https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js'></script>
+
+<!-- Highlight.js for Syntax Highlighting (Client-side) -->
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js'></script>
+<script>hljs.highlightAll();</script>
 
 <style>
   /* Responsive Layout Overrides */
@@ -84,17 +89,11 @@
   });
 </script>
 
-<!-- Highlight.js for Syntax Highlighting (Client-side) -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-<script>hljs.highlightAll();</script>
-
-<script type="module">
+<script type='module'>
   import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
   mermaid.initialize({ startOnLoad: false });
 
   document.addEventListener('DOMContentLoaded', () => {
-    // Since Rouge is disabled, we can use the simple selector
     const mermaidBlocks = document.querySelectorAll('pre code.language-mermaid');
     mermaidBlocks.forEach((block) => {
       const content = block.textContent;
