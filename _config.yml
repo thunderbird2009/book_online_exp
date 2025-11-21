@@ -1,5 +1,23 @@
-title: "Online Experimentation Book"
+title: Engineering Online Experimentation
+description: Architecture, Pipelines, and Statistical Methods for Production-Scale Systems
 theme: minima
-markdown: kramdown
 plugins:
   - jekyll-seo-tag
+
+# 1. Automatic Layout Application
+defaults:
+  -
+    scope:
+      path: ''
+      type: 'pages'
+    values:
+      layout: 'default'
+
+# 2. **CRITICAL: Tell Kramdown to use MathJax extension**
+# This instructs Kramdown to treat math blocks as raw text
+markdown: kramdown
+kramdown:
+  input: GFM
+  math_engine: mathjax # Use MathJax processing
+  # The following line is crucial for $...$ to be treated as math delimiters
+  enable_math: true
