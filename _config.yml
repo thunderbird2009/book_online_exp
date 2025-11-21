@@ -21,3 +21,5 @@ kramdown:
   math_engine: mathjax # Use MathJax processing
   # The following line is crucial for $...$ to be treated as math delimiters
   enable_math: true
+  syntax_highlighter_opts:
+    disable: true
