@@ -25,7 +25,7 @@ If you are responsible for moving online experimentation from slides to systems,
 
 ### What's Not Covered
 
-- Full statistical proofs and measure-theoretic foundations (we cite and link to canonical sources instead)
+- Full statistical proofs and measure-theoretic foundations (we cite and link to canonical sources instead). This includes rigorous mathematical derivations of the Central Limit Theorem, formal proofs of test optimality (e.g., Neyman-Pearson Lemma), measure-theoretic probability theory (σ-algebras, Lebesgue integration), asymptotic theory proofs, and detailed mathematical treatments of convergence. Instead, we focus on intuition, practical application, and point you to authoritative statistical texts when deeper mathematical understanding is needed.
 - Non-Python code stacks (examples use Python, SQL, and widely used data tools)
 - Vendor-specific configuration for commercial platforms (content is vendor-agnostic; principles transfer)
 - Deep causal inference beyond what's needed for product experimentation (e.g., full treatment of IV/DiD/Synthetic Control is out of scope; we provide pointers)
