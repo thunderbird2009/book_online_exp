@@ -4,7 +4,8 @@ Chapter 2 built the statistical engine of experimentation: hypothesis testing, p
 
 This chapter transitions from the "what" of statistical analysis to the "how" of practical experiment design. We cover common A/B test architectural patterns, walk through a step-by-step design process, and identify critical pitfalls that can sabotage findings. By the end, you will architect experiments that generate trustworthy, actionable insights [1][2].
 
-## Table of Contents
+---
+<div><strong>Table of Contents</strong></div>
 
 - [1. Common A/B Test Structures](#1-common-ab-test-structures)
     - [1.1. Two-Sample Test (Independent Samples)](#11-two-sample-test-independent-samples)
@@ -28,15 +29,18 @@ This chapter transitions from the "what" of statistical analysis to the "how" of
         - [The Problem of Multiple Metrics](#the-problem-of-multiple-metrics)
         - [The Problem of Repeated Experiments](#the-problem-of-repeated-experiments)
     - [3.3. Peeking at Results](#33-peeking-at-results)
-- [4. Summary and Transition](#4-summary-and-transition)
-- [5. References and Further Reading](#5-references-and-further-reading)
+- [4. Experiment Design Flow (Recap and Roadmap)](#4-experiment-design-flow-recap-and-roadmap)
+- [5. Summary and Transition](#5-summary-and-transition)
+- [6. References and Further Reading](#6-references-and-further-reading)
 
 ---
 
+<a id="sec-3-1"></a>
 ## 1. Common A/B Test Structures
 
 While the foundational theory of hypothesis testing is general, the specific structure of your hypotheses and the way you collect data depend on the question you are trying to answer. This section covers the most common experimental designs. It is crucial to distinguish these *designs* from the *statistical tests* discussed in the previous section. The experimental design is about the "how" of the setup (e.g., independent groups vs. paired samples), while the metric type determines the specific statistical engine (e.g., t-test vs. z-test) used for the analysis.
 
+<a id="sec-3-1-1"></a>
 ### 1.1. Two-Sample Test (Independent Samples)
 This is the classic experimental design and the workhorse of product experimentation. It is used to compare the means or proportions of two independent groups to determine if they are statistically different from each other.
 
@@ -49,6 +53,7 @@ This is the classic experimental design and the workhorse of product experimenta
     -   For a **binomial metric** (like conversion rate), a **two-sample z-test for proportions** is used.
 -   **Use Case:** This is the default choice for answering most product questions. Is a new headline better than the old one? Does a new recommendation algorithm drive more revenue?
 
+<a id="sec-3-1-1-1"></a>
 #### One-Sided vs. Two-Sided Test Calculations
 Here we assume T-test for the metric. The core formulas for the test statistic and sample size were detailed in the previous sections. However, they differ slightly depending on whether you are running a one-sided or two-sided test, which involves a critical trade-off between statistical power and the ability to detect unexpected outcomes.
 
@@ -66,6 +71,7 @@ Here we assume T-test for the metric. The core formulas for the test statistic a
 
 For this reason, the **two-sided test is the standard and strongly recommended choice for the vast majority of A/B tests.** It provides a crucial safety net, ensuring that you are alerted to statistically significant outcomes in either direction, whether they are positive or negative.
 
+<a id="sec-3-1-2"></a>
 ### 1.2. The Paired Test (Before-and-After Design)
 A paired test is used when the observations in the two groups are not independent but are instead naturally paired [3]. The most common scenario for this is a "before-and-after" study on the same set of users.
 
@@ -76,20 +82,25 @@ A paired test is used when the observations in the two groups are not independen
     -   $H_a: \mu_{difference} \neq 0$ (The mean of the differences is not zero)
 -   **Advantage: Variance Reduction:** This is a powerful technique for reducing variance [4]. By using each user as their own control, you eliminate inter-user variability and isolate the effect of the treatment. This often results in a much more powerful test that requires a smaller sample size.
 
+<a id="sec-3-1-2-1"></a>
 #### P-value and Test Statistic using T-tests
 A one-sample t-test is performed on the list of differences. The test statistic is calculated as:
+<a id="eq-3-1"></a>
 $$
-t = \frac{\bar{d} - 0}{s_d / \sqrt{n}}
+t = \frac{\bar{d} - 0}{s_d / \sqrt{n}} \tag{3.1}
 $$
 Here, $\bar{d}$ is the mean of the differences, $s_d$ is the standard deviation of the differences, and $n$ is the number of pairs. The p-value is derived from this t-statistic using the t-distribution.
 
+<a id="sec-3-1-2-2"></a>
 #### Sample Size Calculation
 The calculation is performed for a one-sample test on the list of differences.
+<a id="eq-3-2"></a>
 $$
-n = \frac{(z_{\alpha/2} + z_{\beta})^2 \cdot \sigma_d^2}{(\text{MDE})^2}
+n = \frac{(z_{\alpha/2} + z_{\beta})^2 \cdot \sigma_d^2}{(\text{MDE})^2} \tag{3.2}
 $$
 The key difference is $\sigma_d^2$, the variance of the *differences*. This can be dramatically smaller than the variance of the original metric, making the required sample size ($n$) much lower.
 
+<a id="sec-3-1-3"></a>
 ### 1.3. Non-Inferiority Tests (Proving "No Harm")
 Non-inferiority testing flips the standard hypothesis structure [3]. It is used when your goal is not to prove that a new version is *better*, but to prove that it is *not unacceptably worse*.
 
@@ -101,34 +112,43 @@ Non-inferiority testing flips the standard hypothesis structure [3]. It is used 
 -   **Analysis:** The analysis uses a one-sided t-test or z-test, but the null hypothesis is centered on the margin $\delta$ instead of 0.
 -   **Use Case:** Essential for engineering-driven changes like infrastructure migrations, code refactoring, or third-party vendor swaps. The goal is to ship technical improvements while guaranteeing they do not significantly harm user-facing metrics.
 
+<a id="sec-3-1-3-1"></a>
 #### P-value and Test Statistic using T-Test
 The test statistic is shifted by the non-inferiority margin, $\delta$. For a metric where a higher value is better, the z-score is:
+<a id="eq-3-3"></a>
 $$
-z = \frac{(\bar{x}_B - \bar{x}_A) - (-\delta)}{\text{Standard Error}}
+z = \frac{(\bar{x}_B - \bar{x}_A) - (-\delta)}{\text{Standard Error}} \tag{3.3}
 $$
 The p-value is then calculated from one tail of the standard normal distribution based on this z-score. It represents the probability of observing the data if the new version were truly inferior by at least $\delta$.
 
+<a id="sec-3-1-3-2"></a>
 #### Sample Size Calculation
 The formula is adjusted for the one-sided nature of the hypothesis.
+<a id="eq-3-4"></a>
 $$
-n = \frac{(z_{\alpha} + z_{\beta})^2 \cdot (\sigma_A^2 + \sigma_B^2)}{(\text{MDE} - \delta)^2}
+n = \frac{(z_{\alpha} + z_{\beta})^2 \cdot (\sigma_A^2 + \sigma_B^2)}{(\text{MDE} - \delta)^2} \tag{3.4}
 $$
 -   We use $z_{\alpha}$ instead of $z_{\alpha/2}$ because it's a one-sided test (e.g., for $\alpha=0.05$, $z_{\alpha}$ is 1.645).
 -   The MDE is often set to 0, as the goal is simply to show the new version is not worse by more than the margin $\delta$.
 
 ---
 
+<a id="sec-3-2"></a>
 ## 2. Putting It All Together: A Step-by-Step Experiment Design
 
 This chapter has covered the individual components of statistical testing. Now we synthesize them by walking through a complete, practical example of designing an experiment from start to finish. This process serves as a blueprint for how to apply the theory we've learned.
 
 **Scenario:** We are a product team at an e-commerce company. Our goal is to improve the number of users who complete a purchase.
 
+For a consolidated visual of the end-to-end design flow (and where advanced topics from Part III slot in), see Section 4.
+
+<a id="sec-3-2-1"></a>
 ### 2.1. Step 1: The Business Question and Metric Definition
 
 -   **Business Question:** We hypothesize that changing the color of our main "Add to Cart" button from its current grey to a more vibrant orange will draw more user attention and lead to more users adding items to their cart.
 -   **Primary Metric:** We define our key success metric as the **Add to Cart Conversion Rate**. This is a proportion metric, calculated as: `(Number of unique users who click "Add to Cart") / (Number of unique users who view a product page)`.
 
+<a id="sec-3-2-2"></a>
 ### 2.2. Step 2: Formulating the Hypotheses
 
 We need to state our question in the formal language of hypothesis testing. Since we want to detect if the change has *any* significant impact (positive or negative), we choose a two-sided test.
@@ -141,6 +161,7 @@ We need to state our question in the formal language of hypothesis testing. Sinc
 -   **Alternative Hypothesis ($H_a$):** The button color has an effect on the conversion rate.
     $$ H_a: p_B \neq p_A $$
 
+<a id="sec-3-2-3"></a>
 ### 2.3. Step 3: Designing the Experiment (Parameter Selection)
 
 This is the most critical design phase, where we define our risk tolerance and what we consider a meaningful result.
@@ -155,12 +176,14 @@ This is the most critical design phase, where we define our risk tolerance and w
     -   Absolute MDE = $0.04 \times 10\% = 0.004$.
     -   This means we want our experiment to be sensitive enough to detect a change if the new conversion rate is $p_B = 4.4\%$ or $3.6\%$.
 
+<a id="sec-3-2-4"></a>
 ### 2.4. Step 4: Calculating the Required Sample Size
 
 Now we assemble our parameters into the sample size formula for a two-sample test of proportions.
 
+<a id="eq-3-5"></a>
 $$
-n = \frac{(z_{\alpha/2} + z_{\beta})^2 \cdot (p_A(1-p_A) + p_B(1-p_B))}{(p_A - p_B)^2}
+n = \frac{(z_{\alpha/2} + z_{\beta})^2 \cdot (p_A(1-p_A) + p_B(1-p_B))}{(p_A - p_B)^2} \tag{3.5}
 $$
 
 Plugging in our values:
@@ -170,8 +193,9 @@ Plugging in our values:
 -   $p_B = 0.044$ (our target for detection)
 -   $p_A - p_B = -0.004$
 
+<a id="eq-3-6"></a>
 $$
-n = \frac{(1.96 + 0.84)^2 \cdot (0.04(1-0.04) + 0.044(1-0.044))}{(-0.004)^2}
+n = \frac{(1.96 + 0.84)^2 \cdot (0.04(1-0.04) + 0.044(1-0.044))}{(-0.004)^2} \tag{3.6}
 $$
 $$
 n = \frac{(2.8)^2 \cdot (0.0384 + 0.042064)}{0.000016} = \frac{7.84 \cdot 0.080464}{0.000016} \approx 39,427
@@ -179,6 +203,7 @@ $$
 
 The result is that we need approximately **39,427 users per group**. The total experiment will need about 78,854 users.
 
+<a id="sec-3-2-5"></a>
 ### 2.5. Step 5: Defining the Fixed Horizon and Decision Rule
 
 This final step is crucial for maintaining the statistical integrity of the experiment.
@@ -194,10 +219,12 @@ This complete design provides a clear plan of action and a rigorous, data-driven
 
 ---
 
+<a id="sec-3-3"></a>
 ## 3. Common Pitfalls and How to Avoid Them
 
 Statistical intuition is not just about knowing the formulas; it's about recognizing the patterns and scenarios where those formulas can mislead us. This section covers the most common traps in experimental analysis.
 
+<a id="sec-3-3-1"></a>
 ### 3.1. The Novelty Effect and Learning Effects
 
 Human behavior is not static. Users react to change, and this reaction can create temporary distortions in experiment results. These distortions typically manifest in two ways: the novelty effect and the learning effect.
@@ -210,6 +237,7 @@ Human behavior is not static. Users react to change, and this reaction can creat
 | **Who Affected** | Existing users (new users immune) | Existing users (new users immune) |
 | **Risk if Stopped Early** | Launch based on temporary lift; long-term metrics show no real improvement | Kill genuinely better feature based on temporary learning curve |
 
+<a id="sec-3-3-1-1"></a>
 #### How to Mitigate Novelty and Learning Effects
 The primary strategy is to **run experiments long enough for behavior to stabilize.**
 
@@ -221,12 +249,14 @@ The primary strategy is to **run experiments long enough for behavior to stabili
 
 Experimentation platforms should provide cohort analysis tools, allowing easy data slicing by user acquisition date to diagnose these effects.
 
+<a id="sec-3-3-2"></a>
 ### 3.2. The Multiple Testing Problem
 
 The multiple testing problem is one of the most insidious and common ways that experimenters draw false conclusions from data. It stems from a simple fact: the significance level, $\alpha=0.05$, guarantees a 5% false positive rate **for a single statistical test**. When you run multiple tests, the probability of getting at least one false positive across the entire set of tests increases dramatically.
 
 This problem manifests in several ways.
 
+<a id="sec-3-3-2-1"></a>
 #### The Problem of Multiple Metrics
 The first form of the multiple testing problem occurs when an experiment tracks many different metrics, and the experimenter is willing to declare victory if *any* of them shows a statistically significant lift. If an experiment tracks 20 different metrics, it's highly probable that at least one of them will show a p-value less than 0.05 just by random chance.
 
@@ -242,6 +272,7 @@ Establish a clear hierarchy *before* experiment launch:
 
 This approach is the main defense against multiple testing. While statistical corrections like Bonferroni exist, they are too conservative for product experimentation [1][5].
 
+<a id="sec-3-3-2-2"></a>
 #### The Problem of Repeated Experiments
 A second form of this problem is re-running an entire experiment hoping for a different result.
 
@@ -249,6 +280,7 @@ A second form of this problem is re-running an entire experiment hoping for a di
 *   **The Flaw:** This is a clear case of multiple testing. Each time the experiment is re-run, it's another independent statistical test. If you are willing to run the test multiple times, you are giving yourself multiple opportunities to hit a 5% false positive.
 *   **The Solution:** A non-significant result should be taken as evidence that there is no detectable effect *with the current design*. Instead of re-running the same experiment, the team should iterate on the feature to create a *stronger* treatment (e.g., a more noticeable UI change) that would have a larger effect size and a better chance of being detected in a *new* experiment.
 
+<a id="sec-3-3-3"></a>
 ### 3.3. Peeking at Results
 
 This is the act of repeatedly checking an experiment's results over time with the intention of stopping as soon as statistical significance is reached [6].
@@ -283,7 +315,92 @@ For most platforms, enforcing a **fixed horizon** is the most practical and effe
 
 ---
 
-## 4. Summary and Transition
+<a id="sec-3-4"></a>
+## 4. Experiment Design Flow (Recap and Roadmap)
+
+This section ties together the core concepts from Chapter 2 (statistical engine, power, and sample size) and Chapter 3 (design structure and pitfalls) into two consolidated diagrams. We also mark advanced techniques that are covered in Part III so readers know where to go next when needs exceed the basic fixed-horizon A/B test.
+
+*Figure 3.1 — Experiment design choices: metric/type → assignment → objective → power/MDE → feasibility and execution, with pointers to advanced topics in Part III.*
+
+```mermaid
+%%{init: {
+    "flowchart": {"htmlLabels": true, "curve": "linear", "nodeSpacing": 20, "rankSpacing": 50, "padding": 30, "useMaxWidth": true},
+    "themeVariables": {"fontSize": "40px", "fontFamily": "Segoe UI, Inter, Arial", "primaryColor": "#eef5ff", "primaryBorderColor": "#528BFF", "primaryTextColor": "#1f2328"}
+} }%%
+flowchart TD
+    %% Experiment Design Decision Diagram (Recap)
+
+    A["Start: Define business question and primary metric"] --> B{"Metric type?"}
+
+    subgraph Statistical_Engine
+        direction TB
+    T1["Engine: Two-sample z-test for proportions<br/>(CI for difference)"]
+    T2["Engine: Welch's two-sample t-test (default)<br/>Student's t if equal variances defensible"]
+    T3["Engine: Poisson/NegBin for low counts<br/>(t-test OK with large n / variance-stabilizing transform)"]
+    T4["Engine: Bootstrap CI or log-transform + t-test<br/>(consider winsorization for heavy tails)<br/>(Part III: Ch11)"]
+        T5["Engine: Mann–Whitney U (ordinal)"]
+    end
+
+    B -->|"Proportion (0/1)"| T1
+    B -->|"Continuous"| T2
+    B -->|"Count/Rate"| T3
+    B -->|"Ratio/Skewed"| T4
+    B -->|"Ordinal"| T5
+
+    A --> C{"Assignment structure?"}
+    C -->|"Independent groups"| D1["Design: Two-sample (A/B)"]
+    C -->|"Same users (before/after or within-subjects)"| D2["Design: Paired; test mean of per-user differences"]
+    C -->|"Traffic patterns non-IID / carryover?"| D3["Non-standard designs: Switchback / Geo<br/>(Part III: Ch14)"]
+
+    A --> E{"Objective?"}
+    E -->|"Detect any difference"| O1["Two-sided test"]
+    E -->|"Only detect improvement"| O2["One-sided test (use with caution)"]
+    E -->|"Show 'no harm'"| O3["Non-inferiority; choose margin δ"]
+
+    A --> F["Set α (e.g., 0.05), power (e.g., 0.80), and MDE.<br/> See this branch in Figure 3.2"]
+
+```
+<br>
+*Figure 3.2 — Power, sample size, feasibility, and disciplined execution; shows where sequential methods and bandits fit (see Part III).* 
+
+```mermaid
+%%{init: {
+    "flowchart": {"htmlLabels": true, "curve": "linear", "nodeSpacing": 15, "rankSpacing": 30, "padding": 200, "useMaxWidth": true},
+    "themeVariables": {"fontSize": "12px", "fontFamily": "Segoe UI, Inter, Arial", "primaryColor": "#eef5ff", "primaryBorderColor": "#528BFF", "primaryTextColor": "#1f2328"}
+} }%%
+flowchart TD
+    %% Smaller styling specifically for S2 (decision diamond)
+    classDef tight font-size:12px,padding:4px;
+    
+    S0["<div style='text-align:left'>Specify α, desired power, and MDE</div>"] --> S1["<div style='text-align:left'>Compute required n per group (Ch2)</div>"]
+    S1 --> S2["<div style='text-align:left'>Feasible in time/traffic?</div>"]
+
+    S2 -->|"Yes"| S3["<div style='text-align:left'>Commit fixed horizon; pre-specify decision rule</div>"]
+    S2 -->|"No"| S4["<div style='text-align:left'>Options to enable decision-making:<br/>• Increase MDE (business acceptable?)<br/>• Variance reduction (next chapter)<br/>• Proxy or upstream metric<br/>• Sequential testing (Part III: Ch11)<br/>• Multi-armed bandits (Part III: Ch15)</div>"]
+
+    S3 --> S5["<div style='text-align:left'>Multiple metrics?</div>"]
+    S4 --> S5
+
+    S5 -->|"Yes"| S6["<div style='text-align:left'>Define metric hierarchy: Primary / Secondary / Guardrails (consider FDR for many secondaries)</div>"]
+    S5 -->|"No"| S7["<div style='text-align:left'>Proceed</div>"]
+
+    S6 --> S8["<div style='text-align:left'>Data quality checks (randomization, identity, unit of diversion, IID)</div>"]
+    S7 --> S8
+
+    S8 --> S9["<div style='text-align:left'>Run to fixed horizon; avoid peeking<br/>(or use alpha-spending if sequential)</div>"]
+    S9 --> S10["<div style='text-align:left'>Decision at horizon</div>"]
+    S10 -->|"p < α and CI excludes 0 (or NI criterion met)"| S11["<div style='text-align:left'>Launch / proceed</div>"]
+    S10 -->|"Otherwise"| S12["<div style='text-align:left'>Iterate (stronger treatment, more power, or better metric)</div>"]
+    %% style former diamond nodes as white with black text
+    style S2 fill:#ffffff,stroke:#000000,color:#000000
+    style S5 fill:#ffffff,stroke:#000000,color:#000000
+    style S10 fill:#ffffff,stroke:#000000,color:#000000
+```
+
+---
+
+<a id="sec-3-5"></a>
+## 5. Summary and Transition
 
 In this chapter, we moved from the abstract statistical theory of Chapter 2 to the concrete practice of designing and running experiments. We have seen that building a trustworthy experiment requires more than just correct formulas; it demands a disciplined process and a keen awareness of potential pitfalls.
 
@@ -300,7 +417,8 @@ In the next chapter, "Metric Design and Variance Reduction," we will tackle this
 
 ---
 
-## 5. References and Further Reading
+<a id="sec-3-6"></a>
+## 6. References and Further Reading
 
 [1] Kohavi, R., Tang, D., & Xu, Y. (2020). *Trustworthy Online Controlled Experiments: A Practical Guide to A/B Testing*. Cambridge University Press. – Comprehensive coverage of experimental design, common pitfalls, and best practices for A/B testing at scale.
 

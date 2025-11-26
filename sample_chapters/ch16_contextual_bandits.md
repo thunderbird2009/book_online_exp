@@ -1,4 +1,4 @@
-# Chapter 16: Contextual Bandits: Personalized Exploration and Exploitation
+# Chapter 16: Contextual Bandits: Personalized Exploration and Exploitation {#chapter-16-contextual-bandits-personalized-exploration-and-exploitation}
 
 In Chapter 15, we learned how Multi-Armed Bandits balance exploration and exploitation to minimize regret when choosing between a fixed set of arms. But what happens when the best choice varies by user or situation? What if mobile users prefer different content than desktop users, or if the best product recommendation depends on a customer's purchase history?
 
@@ -6,40 +6,39 @@ In Chapter 15, we learned how Multi-Armed Bandits balance exploration and exploi
 
 This chapter covers the algorithms, architectures, and practical considerations for deploying contextual bandits in production, featuring a deep dive into Netflix's artwork personalization system.
 
-- [Chapter 16: Contextual Bandits: Personalized Exploration and Exploitation](#chapter-16-contextual-bandits-personalized-exploration-and-exploitation)
-  - [1. From Context-Free to Context-Aware Decision Making](#1-from-context-free-to-context-aware-decision-making)
-  - [2. LinUCB (Linear Upper Confidence Bound)](#2-linucb-linear-upper-confidence-bound)
-  - [3. Thompson Sampling for Linear Models (LinTS)](#3-thompson-sampling-for-linear-models-lints)
-  - [4. Shared Models: Encoding Arms as Features](#4-shared-models-encoding-arms-as-features)
-  - [5. Practical Considerations](#5-practical-considerations)
-  - [6. Neural Bandits](#6-neural-bandits)
-    - [6.1. Neural-Linear Thompson Sampling](#61-neural-linear-thompson-sampling)
-    - [6.2. Production Design of Neural-Linear TS](#62-production-design-of-neural-linear-ts)
-  - [7. Alternative Approaches That Capture More Uncertainty](#7-alternative-approaches-that-capture-more-uncertainty)
-    - [7.1. Bootstrapped Ensembles (Deep Exploration)](#71-bootstrapped-ensembles-deep-exploration)
-    - [7.2. MC Dropout (Monte Carlo Dropout)](#72-mc-dropout-monte-carlo-dropout)
-  - [8. Industry Spotlight: Netflix's Artwork Personalization](#8-industry-spotlight-netflixs-artwork-personalization)
-  - [9. Summary and Next Steps](#9-summary-and-next-steps)
-  - [10. References and Further Reading](#10-references-and-further-reading)
+- [Chapter 16: Contextual Bandits: Personalized Exploration and Exploitation {#chapter-16-contextual-bandits-personalized-exploration-and-exploitation}](#chapter-16-contextual-bandits-personalized-exploration-and-exploitation-chapter-16-contextual-bandits-personalized-exploration-and-exploitation)
+  - [1. From Context-Free to Context-Aware Decision Making {#1-from-context-free-to-context-aware-decision-making}](#1-from-context-free-to-context-aware-decision-making-1-from-context-free-to-context-aware-decision-making)
+  - [2. LinUCB (Linear Upper Confidence Bound) {#2-linucb-linear-upper-confidence-bound}](#2-linucb-linear-upper-confidence-bound-2-linucb-linear-upper-confidence-bound)
+  - [3. Thompson Sampling for Linear Models (LinTS) {#3-thompson-sampling-for-linear-models-lints}](#3-thompson-sampling-for-linear-models-lints-3-thompson-sampling-for-linear-models-lints)
+  - [4. Shared Models: Encoding Arms as Features {#4-shared-models-encoding-arms-as-features}](#4-shared-models-encoding-arms-as-features-4-shared-models-encoding-arms-as-features)
+  - [5. Practical Considerations {#5-practical-considerations}](#5-practical-considerations-5-practical-considerations)
+  - [6. Neural Bandits {#6-neural-bandits}](#6-neural-bandits-6-neural-bandits)
+    - [6.1. Neural-Linear Thompson Sampling {#61-neural-linear-thompson-sampling}](#61-neural-linear-thompson-sampling-61-neural-linear-thompson-sampling)
+    - [6.2. Production Design of Neural-Linear TS {#62-production-design-of-neural-linear-ts}](#62-production-design-of-neural-linear-ts-62-production-design-of-neural-linear-ts)
+  - [7. Alternative Approaches That Capture More Uncertainty {#7-alternative-approaches-that-capture-more-uncertainty}](#7-alternative-approaches-that-capture-more-uncertainty-7-alternative-approaches-that-capture-more-uncertainty)
+    - [7.1. Bootstrapped Ensembles (Deep Exploration) {#71-bootstrapped-ensembles-deep-exploration}](#71-bootstrapped-ensembles-deep-exploration-71-bootstrapped-ensembles-deep-exploration)
+    - [7.2. MC Dropout (Monte Carlo Dropout) {#72-mc-dropout-monte-carlo-dropout}](#72-mc-dropout-monte-carlo-dropout-72-mc-dropout-monte-carlo-dropout)
+  - [8. Industry Spotlight: Netflix's Artwork Personalization {#8-industry-spotlight-netflixs-artwork-personalization}](#8-industry-spotlight-netflixs-artwork-personalization-8-industry-spotlight-netflixs-artwork-personalization)
+  - [Summary and Next Steps {#summary-and-next-steps}](#summary-and-next-steps-summary-and-next-steps)
+  - [References and Further Reading {#references-and-further-reading}](#references-and-further-reading-references-and-further-reading)
 
 ---
 
-<a id="sec-16-1"></a>
-## 1. From Context-Free to Context-Aware Decision Making
+## 1. From Context-Free to Context-Aware Decision Making {#1-from-context-free-to-context-aware-decision-making}
 
 The core loop adds a context observation step:
 
-0. **Model reward as a function of current context and an arm chosen:** $\hat{r}_t = R(x_t, a)$.
-1. **Observe context** $x_t$.
+0. **Model reward as a function of current context and an arm chosen:** $\hat{r}_{t} = R(x_{t}, a)$.
+1. **Observe context** $x_{t}$.
 2. **Choose an arm** by computing the predicted reward for each arm given the current context, plus an uncertainty bonus for exploration.
-3. **Observe reward** $r_t$.
-4. **Update** the model $R$ with the tuple $(x_t, a, r_t)$.
+3. **Observe reward** $r_{t}$.
+4. **Update** the model $R$ with the tuple $(x_{t}, a, r_{t})$.
 
-***Note: In the most general form of Contextual MAB, context is per arm, hence so is the reward model as well: $R_a(x_{a,t}, a)$***
+***Note: In the most general form of Contextual MAB, context is per arm, hence so is the reward model as well: $R_{a}(x_{a,t}, a)$***
 
-**Context notation:** We use $x_{a,t}$ to denote the context for arm $a$ at time $t$, which may include user features (device, location, history) and arm-specific features (category, attributes). When all arms share the same user/environment context, we write $x_t$. The choice between per-arm and shared contexts affects model architecture, discussed in Sections 2-4.
+**Context notation:** We use $x_{a,t}$ to denote the context for arm $a$ at time $t$, which may include user features (device, location, history) and arm-specific features (category, attributes). When all arms share the same user/environment context, we write $x_{t}$. The choice between per-arm and shared contexts affects model architecture, discussed in Sections 2-4.
 
-**When to use each approach:** Use per-arm context $x_{a,t}$ when arms have distinct features (e.g., article embeddings, product attributes). Use shared context $x_t$ when only user/environment varies (e.g., device, location). Most production systems concatenate both: $x_{a,t} = [x_{\text{user}, t}; x_{\text{arm}, a}]$, combining user features with arm-specific features to capture all relevant information.
+**When to use each approach:** Use per-arm context $x_{a,t}$ when arms have distinct features (e.g., article embeddings, product attributes). Use shared context $x_{t}$ when only user/environment varies (e.g., device, location). Most production systems concatenate both: $x_{a,t} = [x_{\text{user}, t}; x_{\text{arm}, a}]$, combining user features with arm-specific features to capture all relevant information.
 
 Contextual bandits shine when the best choice varies by user or situation, when you have large dynamic action sets with frequent cold-start scenarios, and when you want to maximize reward *during* the learning process—not just learn and deploy afterward.
 
@@ -48,8 +47,8 @@ Table 16.1 — Comparison of MAB and Contextual MAB
 
 | Aspect | MAB | Contextual MAB |
 | :-- | :-- | :-- |
-| What the policy sees | Only past rewards per arm (no context) | Per-round context x_t and often per-arm features x_{a,t} |
-| Decision rule | Pick the globally best arm based on historical performance/uncertainty | Pick the best arm for this context; scores depend on x_t (and x_{a,t}) |
+| What the policy sees | Only past rewards per arm (no context) | Per-round context $x_{t}$ and often per-arm features $x_{a,t}$ |
+| Decision rule | Pick the globally best arm based on historical performance/uncertainty | Pick the best arm for this context; scores depend on $x_{t}$ (and $x_{a,t}$) |
 | Data efficiency | Needs many pulls per arm; struggles with large/changing action sets | Generalizes across users/items via features; better cold-start |
 | Best for | Small, stable arm sets; one winner acceptable for most users | Personalization, geo/seasonality, large catalogs (content/ads/products) |
 | Risks & trade-offs | May miss segment-specific winners; simpler to run | Requires good features and drift monitoring; risk of leakage/stale context |
@@ -60,37 +59,36 @@ Contextual MAB balances exploitation and exploration of each arm based on the pr
 
 ---
 
-<a id="sec-16-2"></a>
-## 2. LinUCB (Linear Upper Confidence Bound)
+## 2. LinUCB (Linear Upper Confidence Bound) {#2-linucb-linear-upper-confidence-bound}
 
 LinUCB [1, 2] is the contextual analog of UCB1. It assumes the expected reward is approximately linear in the features for each arm. The features $x_{a,t}$ typically combine user/context features (device, location, history) with arm-specific features (item category, price, embeddings), creating a per-arm feature vector. 
 
-**Per-arm model:** In this most general form, each arm has its own reward model with separate parameters $\theta_a$:
+**Per-arm model:** In this most general form, each arm has its own reward model with separate parameters $\theta_{a}$:
 
 <a id="eq-16-1"></a>
 $$
-\mathbb{E}[r_t \mid x_{a,t}] \approx x_{a,t}^T \theta_a \tag{16.1}
+\mathbb{E}[r_{t} \mid x_{a,t}] \approx x_{a,t}^{T} \theta_{a} \tag{16.1}
 $$
 
 For each arm *a*, we maintain separate parameters and statistics:
-*   $A_a = λI + Σ x x^T$ (a covariance matrix tracking feature correlations)
-*   $b_a = Σ r x$ (a weighted sum of observed rewards)
-*   $θ̂_a = A_a^{-1} b_a$ (the estimated parameter vector)
+*   $A_{a} = \lambda I + \Sigma x x^{T}$ (a covariance matrix tracking feature correlations)
+*   $b_{a} = \Sigma r x$ (a weighted sum of observed rewards)
+*   $\hat{\theta}_{a} = A_{a}^{-1} b_{a}$ (the estimated parameter vector)
 
 At decision time, we compute an upper confidence bound for each arm and choose the one with the highest score:
 
 <a id="eq-16-2"></a>
 $$
-p_a = x_{a,t}^T \hat{\theta}_a + \alpha \sqrt{x_{a,t}^T A_a^{-1} x_{a,t}} \tag{16.2}
+p_{a} = x_{a,t}^{T} \hat{\theta}_{a} + \alpha \sqrt{x_{a,t}^{T} A_{a}^{-1} x_{a,t}} \tag{16.2}
 $$
 
 The first term is the predicted reward; the second term is the uncertainty bonus (analogous to the UCB formula in Chapter 15, Equation 15.1).
 
-**Intuition for the uncertainty bonus:** The term $\alpha \sqrt{x_{a,t}^T A_a^{-1} x_{a,t}}$ measures how "novel" the current context is for arm *a*. The matrix $A_a = Σ x·x^T$ accumulates information about explored feature directions—large where we have data, small where we don't. Its inverse $A_a^{-1}$ is large where data is scarce. The quadratic form $x_{a,t}^T A_a^{-1} x_{a,t}$ measures uncertainty in the current context direction: large for unexplored feature space (big exploration bonus), small for familiar contexts.
+**Intuition for the uncertainty bonus:** The term $\alpha \sqrt{x_{a,t}^T A_{a}^{-1} x_{a,t}}$ measures how "novel" the current context is for arm *a*. The matrix $A_{a} = \Sigma x \cdot x^{T}$ accumulates information about explored feature directions—large where we have data, small where we don't. Its inverse $A_{a}^{-1}$ is large where data is scarce. The quadratic form $x_{a,t}^T A_{a}^{-1} x_{a,t}$ measures uncertainty in the current context direction: large for unexplored feature space (big exploration bonus), small for familiar contexts.
 
-In Bayesian terms (assuming Gaussian noise with variance σ²), $A_a^{-1}$ is the posterior covariance over $θ_a$, and $\sqrt{x_{a,t}^T A_a^{-1} x_{a,t}}$ is the predicted reward's standard deviation—a confidence interval width.
+In Bayesian terms (assuming Gaussian noise with variance $\sigma^{2}$), $A_{a}^{-1}$ is the posterior covariance over $\theta_{a}$, and $\sqrt{x_{a,t}^T A_{a}^{-1} x_{a,t}}$ is the predicted reward's standard deviation—a confidence interval width.
 
-After observing reward *r* for the chosen arm, we update: $A_a ← A_a + xx^T$ and $b_a ← b_a + rx$.
+After observing reward *r* for the chosen arm, we update: $A_{a} \leftarrow A_{a} + xx^{T}$ and $b_{a} \leftarrow b_{a} + rx$.
 
 A minimal Python implementation of LinUCB maintains per-arm covariance matrices **A** and reward accumulators **b**, then computes the UCB score for each arm at selection time.
 
@@ -136,8 +134,7 @@ class LinUCB:
 
 ---
 
-<a id="sec-16-3"></a>
-## 3. Thompson Sampling for Linear Models (LinTS)
+## 3. Thompson Sampling for Linear Models (LinTS) {#3-thompson-sampling-for-linear-models-lints}
 
 LinTS [3] is the Bayesian probability-matching version of LinUCB. Instead of computing an upper confidence bound, we sample a plausible parameter vector from the posterior distribution and choose the arm with the highest predicted reward under that sample.
 
@@ -170,24 +167,23 @@ LinTS provides an elegant alternative to LinUCB, but both methods share a limita
 
 ---
 
-<a id="sec-16-4"></a>
-## 4. Shared Models: Encoding Arms as Features
+## 4. Shared Models: Encoding Arms as Features {#4-shared-models-encoding-arms-as-features}
 
-The LinUCB and LinTS algorithms shown in Sections 2-3 use **per-arm parameters**—each arm has its own $θ_a$, $A_a$, and $b_a$. This works well when you have hundreds of observations per arm, but breaks down in three scenarios:
+The LinUCB and LinTS algorithms shown in Sections 2-3 use **per-arm parameters**—each arm has its own $\theta_{a}$, $A_{a}$, and $b_{a}$. This works well when you have hundreds of observations per arm, but breaks down in three scenarios:
 
 1. **Cold-start:** New arms have no data, so their parameters are uninformed
 2. **Large action spaces:** With thousands of arms (e.g., product catalog), maintaining separate parameters is computationally expensive
 3. **Sparse data:** Most arms receive few pulls, leading to high-variance parameter estimates
 
-**Shared model solution:** Use a single model (one θ, A, b) that takes arm-specific features as input. Instead of learning separate parameters per arm, the model learns to predict rewards based on arm attributes (category, price, embeddings, etc.) concatenated with user context. This enables generalization: knowledge transfers across arms with similar features.
+**Shared model solution:** Use a single model (one $\theta$, $A$, $b$) that takes arm-specific features as input. Instead of learning separate parameters per arm, the model learns to predict rewards based on arm attributes (category, price, embeddings, etc.) concatenated with user context. This enables generalization: knowledge transfers across arms with similar features.
 
 **Architecture Comparison:**
 
 | Aspect | Per-Arm Parameters (Section 2) | Shared Parameters (This Section) |
 | :--- | :--- | :--- |
-| **Input** | User features only: x_user = [device, location, time_of_day] | Concatenated: x = [x_user; x_arm] = [device, location, time_of_day, **arm_category, arm_price, arm_embedding, ...**] |
-| **Model** | Separate model per arm: θ_arm1, θ_arm2, θ_arm3, ... | Single model: θ |
-| **Prediction** | $\hat{r}_{a} = x_{\text{user}}^T \theta_a$ | $\hat{r} = [x_{\text{user}}; x_{\text{arm}}]^T \theta$ |
+| **Input** | User features only: $x_{\text{user}}$ = [device, location, time_of_day] | Concatenated: $x = [x_{\text{user}}; x_{\text{arm}}]$ = [device, location, time_of_day, **arm_category, arm_price, arm_embedding, ...**] |
+| **Model** | Separate model per arm: $\theta_{\text{arm1}}, \theta_{\text{arm2}}, \theta_{\text{arm3}}, ...$ | Single model: $\theta$ |
+| **Prediction** | $\hat{r}_{a} = x_{\text{user}}^{T} \theta_{a}$ | $\hat{r} = [x_{\text{user}}; x_{\text{arm}}]^{T} \theta$ |
 
 **Code Example: Recommendation System with Shared LinUCB**
 
@@ -284,7 +280,7 @@ bandit.update(user_context, candidates[chosen_idx], reward=1)
 
 1. **Generalization:** The model learns that "mobile users at 2pm prefer fresh tech articles"—this knowledge transfers to all tech articles, not just those seen before
 2. **Cold-start resilience:** A brand new article with features [1, 0, 0.1, 0.8] immediately benefits from learned patterns about tech articles and popular authors
-3. **Data efficiency:** Every observation updates the shared θ, so learning is faster than per-arm models that split data K ways
+3. **Data efficiency:** Every observation updates the shared $\theta$, so learning is faster than per-arm models that split data K ways
 4. **Scalability:** Adding 100 new articles requires no model changes—just compute their arm features
 
 **When to Use Shared vs. Per-Arm:**
@@ -303,8 +299,7 @@ In practice, **start with shared models using arm features**—they're more robu
 
 ---
 
-<a id="sec-16-5"></a>
-## 5. Practical Considerations
+## 5. Practical Considerations {#5-practical-considerations}
 
 **Feature Engineering**
 
@@ -320,7 +315,7 @@ Use shared models (see Section 4) to transfer knowledge to new arms via their fe
 
 **Non-Stationarity**
 
-Discount history (A ← γA, b ← γb with γ < 1) or use sliding windows to down-weight old observations. Monitor reward distributions for drift and retrain when patterns shift.
+Discount history ($A \leftarrow \gamma A$, $b \leftarrow \gamma b$ with $\gamma < 1$) or use sliding windows to down-weight old observations. Monitor reward distributions for drift and retrain when patterns shift.
 
 **Fairness and Safety**
 
@@ -328,7 +323,7 @@ Enforce minimum exploration per user segment (e.g., geo region, device type) to 
 
 **Binary Rewards**
 
-For binary outcomes, a logistic link *P(r=1|x,a) = σ(x^T θ)* is common. In practice, LinUCB and LinTS remain effective approximations even with this non-linear model.
+For binary outcomes, a logistic link $P(r=1 \mid x,a) = \sigma(x^{T} \theta)$ is common. In practice, LinUCB and LinTS remain effective approximations even with this non-linear model.
 
 **Logging for Offline Evaluation**
 
@@ -338,8 +333,8 @@ Keep math light, but keep logs rich: record chosen actions, propensities (select
 
 | Parameter | Typical Range | Recommendation |
 |-----------|---------------|----------------|
-| α (LinUCB exploration) | 0.1-2.0 | Start with 1.0; increase if under-exploring |
-| Ridge λ | 0.1-1.0 | 1.0 for small feature sets, 0.1 for high-dimensional |
+| $\alpha$ (LinUCB exploration) | 0.1-2.0 | Start with 1.0; increase if under-exploring |
+| Ridge $\lambda$ | 0.1-1.0 | 1.0 for small feature sets, 0.1 for high-dimensional |
 | Batch size (neural) | 16-128 | 32 for most cases |
 | Update frequency | 100-1000 obs | Every 100-500 for fast-changing domains |
 
@@ -352,7 +347,7 @@ Ensure user consent for feature collection and personalization. Anonymize logs p
 Track these metrics continuously to detect issues:
 - **Reward distribution drift**: Monitor mean and variance of observed rewards. Alert if p5 or p95 shifts >20% week-over-week.
 - **Feature drift**: Compute KL divergence between current and historical feature distributions. Alert if divergence exceeds threshold.
-- **Selection entropy**: H = -Σ p_a log(p_a) measures exploration diversity. Low entropy (<0.5 for normalized K arms) suggests premature convergence.
+- **Selection entropy**: $H = -\Sigma p_{a} \log(p_{a})$ measures exploration diversity. Low entropy (<0.5 for normalized K arms) suggests premature convergence.
 - **Arm coverage**: Ensure all arms receive minimum exploration (e.g., 1% traffic) to detect quality shifts early.
 - **Feature-reward correlation**: Periodically verify that features correlate with rewards (Pearson r > 0.1). Fall back to random exploration if correlations degrade.
 
@@ -363,19 +358,18 @@ Track these metrics continuously to detect issues:
 
 ---
 
-<a id="sec-16-6"></a>
-## 6. Neural Bandits
+## 6. Neural Bandits {#6-neural-bandits}
 
 When the reward function is highly non-linear and the linear assumption of LinUCB/LinTS breaks down, neural networks can learn more expressive representations. The key challenge is maintaining uncertainty estimates for exploration.
 
-### 6.1. Neural-Linear Thompson Sampling
-**Neural-Linear Thompson Sampling** [5] provides a strong baseline: use a small neural network to learn a feature representation φ = f_θ(x), then maintain a Bayesian linear head on φ for uncertainty quantification. This approach combines the representational power of neural networks with principled uncertainty estimation from Bayesian linear models.
+### 6.1. Neural-Linear Thompson Sampling {#61-neural-linear-thompson-sampling}
+**Neural-Linear Thompson Sampling** [5] provides a strong baseline: use a small neural network to learn a feature representation $\phi = f_\theta(x)$, then maintain a Bayesian linear head on $\phi$ for uncertainty quantification. This approach combines the representational power of neural networks with principled uncertainty estimation from Bayesian linear models.
 
-**Architecture:** The neural network learns features φ = f_θ(x), then a Bayesian linear head predicts reward as w^T φ. The "Bayesian" aspect: we maintain a posterior distribution over w (tracked by A and b matrices) rather than a point estimate, enabling principled uncertainty quantification.
+**Architecture:** The neural network learns features $\phi = f_{\theta}(x)$, then a Bayesian linear head predicts reward as $w^{T} \phi$. The "Bayesian" aspect: we maintain a posterior distribution over $w$ (tracked by $A$ and $b$ matrices) rather than a point estimate, enabling principled uncertainty quantification.
 
 **Training:** Both components train jointly end-to-end via gradient descent on standard supervised loss (MSE or cross-entropy). Batch updates occur every N steps (e.g., N=100) to amortize computation.
 
-**Inference for exploration:** The neural network freezes (fixed feature extractor), while the Bayesian linear head maintains uncertainty. Sample w from the posterior (using A, b as in LinUCB/LinTS) to get exploration bonuses.
+**Inference for exploration:** The neural network freezes (fixed feature extractor), while the Bayesian linear head maintains uncertainty. Sample $w$ from the posterior (using $A$, $b$ as in LinUCB/LinTS) to get exploration bonuses.
 
 <a id="lst-16-4"></a>
 Listing 16.4 — Neural-linear Thompson Sampling (pedagogical pseudocode, not runnable)
@@ -516,7 +510,7 @@ for all observations:
 
 This is a pragmatic trade-off—full Bayesian inference over neural network weights is computationally prohibitive. The method works well when the neural network has sufficient capacity and data to learn stable features, but may underestimate uncertainty in the early stages of learning or with distribution shift.
 
-### 6.2. Production Design of Neural-Linear TS
+### 6.2. Production Design of Neural-Linear TS {#62-production-design-of-neural-linear-ts}
 
 Listing 16.4 illustrates core concepts. For production, use frameworks like Vowpal Wabbit, ContextualBandits library, PyTorch-based implementations, or cloud services (AWS Personalize, Google Recommendations AI).
 
@@ -660,12 +654,11 @@ This architecture achieves:
 
 ---
 
-<a id="sec-16-7"></a>
-## 7. Alternative Approaches That Capture More Uncertainty
+## 7. Alternative Approaches That Capture More Uncertainty {#7-alternative-approaches-that-capture-more-uncertainty}
 
 The neural-linear approach treats the neural network as a point estimate, ignoring uncertainty in the learned features. Two alternatives address this limitation by quantifying uncertainty in both the features and predictions:
 
-### 7.1. Bootstrapped Ensembles (Deep Exploration)
+### 7.1. Bootstrapped Ensembles (Deep Exploration) {#71-bootstrapped-ensembles-deep-exploration}
 
 Train K independent neural networks (e.g., K=5-10) on different bootstrapped samples of the training data. At inference time, run all K models and use their disagreement as an uncertainty signal.
 
@@ -677,10 +670,10 @@ Train K independent neural networks (e.g., K=5-10) on different bootstrapped sam
 
 **Uncertainty formula:** For arm *a* with context *x*, compute predictions from all K models:
 $$
-\hat{r}_1, \hat{r}_2, \ldots, \hat{r}_K = f_{\theta_1}(x), f_{\theta_2}(x), \ldots, f_{\theta_K}(x)
+\hat{r}_{1}, \hat{r}_{2}, \ldots, \hat{r}_{K} = f_{\theta_{1}}(x), f_{\theta_{2}}(x), \ldots, f_{\theta_{K}}(x)
 $$
 
-Uncertainty bonus = $\beta \cdot \text{std}(\hat{r}_1, \ldots, \hat{r}_K)$ where β is a hyperparameter.
+Uncertainty bonus = $\beta \cdot \text{std}(\hat{r}_{1}, \ldots, \hat{r}_{K})$ where $\beta$ is a hyperparameter.
 
 **Thompson Sampling variant:** Sample one network uniformly at random, use its prediction for arm selection. Networks that consistently predict well get implicitly weighted higher over time.
 
@@ -693,7 +686,7 @@ Uncertainty bonus = $\beta \cdot \text{std}(\hat{r}_1, \ldots, \hat{r}_K)$ where
 
 **When to use:** High-stakes applications where underestimating uncertainty is costly (medical treatment selection, financial decisions). The computational overhead is justified when exploration mistakes are expensive.
 
-### 7.2. MC Dropout (Monte Carlo Dropout)
+### 7.2. MC Dropout (Monte Carlo Dropout) {#72-mc-dropout-monte-carlo-dropout}
 
 MC dropout keeps dropout layers *active* at inference time to approximate Bayesian uncertainty. Standard dropout zeros neurons randomly during training to prevent overfitting. MC dropout extends this by running multiple stochastic forward passes at inference—the variance across predictions estimates uncertainty.
 
@@ -706,10 +699,10 @@ MC dropout keeps dropout layers *active* at inference time to approximate Bayesi
 
 **Uncertainty formula:** For arm *a* with context *x*, run T stochastic forward passes:
 $$
-\hat{r}_1, \hat{r}_2, \ldots, \hat{r}_T = f_{\theta}(x; \text{dropout}_1), f_{\theta}(x; \text{dropout}_2), \ldots, f_{\theta}(x; \text{dropout}_T)
+\hat{r}_{1}, \hat{r}_{2}, \ldots, \hat{r}_{T} = f_{\theta}(x; \text{dropout}_{1}), f_{\theta}(x; \text{dropout}_{2}), \ldots, f_{\theta}(x; \text{dropout}_{T})
 $$
 
-Uncertainty bonus = $\alpha \cdot \text{std}(\hat{r}_1, \ldots, \hat{r}_T)$.
+Uncertainty bonus = $\alpha \cdot \text{std}(\hat{r}_{1}, \ldots, \hat{r}_{T})$.
 
 **Interpretation:** Each dropout mask samples a different sub-network. The collection of sub-networks approximates a Bayesian posterior over network weights. High variance means the model is uncertain.
 
@@ -743,8 +736,7 @@ Uncertainty bonus = $\alpha \cdot \text{std}(\hat{r}_1, \ldots, \hat{r}_T)$.
 
 ---
 
-<a id="sec-16-8"></a>
-## 8. Industry Spotlight: Netflix's Artwork Personalization
+## 8. Industry Spotlight: Netflix's Artwork Personalization {#8-industry-spotlight-netflixs-artwork-personalization}
 
 Netflix uses contextual bandits to personalize artwork for titles [4], selecting from multiple images based on user preferences and viewing context. A user who enjoys romantic comedies might see a couple embracing, while an action fan sees an explosion. The system learns from billions of impressions daily, balancing exploration of new artwork with exploitation of proven winners.
 
@@ -777,8 +769,7 @@ Netflix uses contextual bandits to personalize artwork for titles [4], selecting
 
 ---
 
-<a id="sec-16-9"></a>
-## 9. Summary and Next Steps
+## Summary and Next Steps {#summary-and-next-steps}
 
 Contextual bandits extend the exploration-exploitation framework to personalization, enabling systems to adapt decisions based on user context, situation, and arm features. Key takeaways:
 
@@ -808,8 +799,7 @@ In the next chapter, we return to the world of controlled experiments and explor
 
 ---
 
-<a id="sec-16-10"></a>
-## 10. References and Further Reading
+## References and Further Reading {#references-and-further-reading}
 
 [1] Li, L., Chu, W., Langford, J., & Schapire, R. E. (2010). A contextual-bandit approach to personalized news article recommendation. *Proceedings of the 19th International Conference on World Wide Web* (WWW), 661-670.
 
