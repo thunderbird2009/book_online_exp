@@ -4,7 +4,7 @@ This repository contains sample chapters and code the book project “Engineerin
 ## What’s inside
 
 - [Sample Chapters](sample_chapters/)
-  - [ch0_front_matter.md](sample_chapters/ch0_front_matter.md): Front matter and full Table of Contents]
+  - [ch0_front_matter.md](sample_chapters/ch0_front_matter.md): Front matter and full content guide. Translation in Chinese (sample_chapters_chinese/ch0_front_matter.md)
   - [ch3_designing_trustworthy_experiments.md](sample_chapters/ch3_designing_trustworthy_experiments.md): Designing Trustworthy Experiments.
   - [ch13_ranking_experiments.md](sample_chapters/ch13_ranking_experiments.md): Evaluating Ranking Systems (interleaving, Wilcoxon, power simulation)
   - [ch16_contextual_bandits.md](sample_chapters/ch16_contextual_bandits.md): Contextual Multi-ARM Bandit
